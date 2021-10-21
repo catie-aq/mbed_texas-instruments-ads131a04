@@ -72,7 +72,7 @@ uint8_t ADS131A04::stop()
     status = send_command(Command::unlock);
 
     if (status == 0x0655) {
-        // Enable All ADC channel
+        // Disable All ADC channel
         spi_write_register(RegisterAddress::adc_ena, 0x00);
 
         // Wake-up from standby mode

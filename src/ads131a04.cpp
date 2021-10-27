@@ -163,8 +163,8 @@ uint8_t ADS131A04::spi_write_register(RegisterAddress registerAddress, uint8_t v
 uint8_t ADS131A04::send_command(Command command, uint16_t *value)
 {
     static char data[2];
-    data[0] = static_cast<char>(Command::wreg);
-    data[1] = 0x00;
+    data[0] = (char)static_cast<uint16_t>(Command::wreg) >> 8;
+    data[1] = (char)static_cast<uint16_t>(Command::wreg);
 
     *_cs = 0;
 

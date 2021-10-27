@@ -116,53 +116,65 @@ uint8_t ADS131A04::set_gain(ADC adc, uint8_t gain)
 
 uint8_t ADS131A04::spi_read_register(RegisterAddress registerAddress, uint8_t *value)
 {
-    uint16_t word
-            = static_cast<uint8_t>(Command::rreg) | (static_cast<uint8_t>(registerAddress) << 8);
-
-    char txData[2] = { 0 };
-    txData[1] = (word & 0xff);
-    txData[0] = (word >> 8);
-
-    char ret[3]; // = 0;
+    static char data[2];
+    data[0] = static_cast<char>(Command::rreg) | static_cast<char>(registerAddress);
+    data[1] = 0x00;
 
     *_cs = 0;
 
-    _spi->write(txData, 2, ret, 3);
+    if (_spi->write(data, 2, nullptr, 0) != 0) {
+        return -1;
+    }
+
+    char ret = 0;
+
+    if (_spi->write(&ret, 1, &ret, 1) != 0) {
+        return -1;
+    }
 
     *_cs = 1;
 
-    for (int i = 0; i < 3; i++) {
-        printf("%d\n", ret[i]);
-    }
-
-    printf("Read register %d : %d\n", (uint8_t)registerAddress, ret);
-
-    return 1;
+    return ret;
 }
 
 uint8_t ADS131A04::spi_write_register(RegisterAddress registerAddress, uint8_t value)
 {
-    uint16_t word
-            = static_cast<uint8_t>(Command::wreg) | static_cast<uint8_t>(registerAddress) >> 8;
+    static char data[2];
+    data[0] = static_cast<char>(Command::wreg) | static_cast<char>(registerAddress);
+    data[1] = static_cast<char>(value);
 
     *_cs = 0;
 
-    _spi->write((const char *)&word, 2, nullptr, 0);
+    if (_spi->write(data, 2, nullptr, 0) != 0) {
+        return -1;
+    }
+
+    char ret = 0;
+
+    if (_spi->write(&ret, 1, &ret, 1) != 0) {
+        return -1;
+    }
 
     *_cs = 1;
 
-    return 0;
+    return ret;
 }
 
 uint8_t ADS131A04::send_command(Command command, uint16_t *value)
 {
-    uint16_t word = static_cast<uint16_t>(Command::rreg);
+    static char data[2];
+    data[0] = static_cast<char>(Command::wreg);
+    data[1] = 0x00;
 
     *_cs = 0;
 
-    _spi->write((const char *)&word, 2, (char *)value, 2);
+    if (_spi->write(data, 2, data, 2) != 0) {
+        return -1;
+    }
 
     *_cs = 1;
+
+    *value = ((uint16_t)data[0] << 8) | ((uint16_t)data[1] & 0x00FF);
 
     return 0;
 }

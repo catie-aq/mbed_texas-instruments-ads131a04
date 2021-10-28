@@ -12,11 +12,19 @@ namespace sixtron {
 #define CHIP_ID 0x04
 #define WORD_LENGTH 4
 
+typedef struct adc_data_struct {
+    uint16_t response;
+    int32_t channel1;
+    int32_t channel2;
+    int32_t channel3;
+    int32_t channel4;
+} adc_data_struct;
+
 class ADS131A04 {
 public:
     enum class ADC : uint8_t { all = 0x00, adc1 = 0x01, adc2 = 0x02, adc3 = 0x03, adc4 = 0x04 };
 
-    ADS131A04(SPI *spi, PinName cs, PinName reset);
+    ADS131A04(SPI *spi, PinName cs, PinName reset, PinName drdy);
 
     uint8_t init();
 
@@ -25,6 +33,8 @@ public:
     uint8_t start();
 
     uint8_t stop();
+
+    uint8_t read_adc_data(adc_data_struct *dataStruct);
 
 private:
     enum class Command : uint16_t {
@@ -80,12 +90,13 @@ private:
 
     uint8_t send_command(Command command, uint16_t *value = nullptr);
 
+    void set_adc_data_callback(Callback<void()> func);
+
     SPI *_spi;
 
-    DigitalOut *_cs;
-    DigitalOut *_reset;
-
-    // InterruptIn &drdy;
+    DigitalOut _cs;
+    DigitalOut _reset;
+    InterruptIn _drdy;
 };
 
 } // namespace sixtron

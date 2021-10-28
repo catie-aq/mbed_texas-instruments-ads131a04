@@ -116,59 +116,69 @@ uint8_t ADS131A04::set_gain(ADC adc, uint8_t gain)
 
 uint8_t ADS131A04::spi_read_register(RegisterAddress registerAddress, uint8_t *value)
 {
-    static char data[2];
+    static char data[WORD_LENGTH] = { 0 };
     data[0] = static_cast<char>(Command::rreg) | static_cast<char>(registerAddress);
-    data[1] = 0x00;
+
+    static char ret[WORD_LENGTH] = { 0 };
 
     *_cs = 0;
 
-    if (_spi->write(data, 2, nullptr, 0) != 0) {
+    if (_spi->write(data, WORD_LENGTH, nullptr, 0) != 0) {
+        *_cs = 1;
         return -1;
     }
 
-    char ret = 0;
-
-    if (_spi->write(&ret, 1, &ret, 1) != 0) {
+    if (_spi->write(&ret, WORD_LENGTH, &ret, WORD_LENGTH) != 0) {
+        *_cs = 1;
         return -1;
     }
 
     *_cs = 1;
 
-    return ret;
+    *value = ret[1];
+
+    return 0;
 }
 
 uint8_t ADS131A04::spi_write_register(RegisterAddress registerAddress, uint8_t value)
 {
-    static char data[2];
+    static char data[WORD_LENGTH] = { 0 };
     data[0] = static_cast<char>(Command::wreg) | static_cast<char>(registerAddress);
     data[1] = static_cast<char>(value);
 
+    static char ret[WORD_LENGTH] = { 0 };
+
     *_cs = 0;
 
-    if (_spi->write(data, 2, nullptr, 0) != 0) {
+    if (_spi->write(data, WORD_LENGTH, nullptr, 0) != 0) {
+        *_cs = 1;
         return -1;
     }
 
-    char ret = 0;
-
-    if (_spi->write(&ret, 1, &ret, 1) != 0) {
+    if (_spi->write(&ret, WORD_LENGTH, &ret, WORD_LENGTH) != 0) {
+        *_cs = 1;
         return -1;
     }
 
     *_cs = 1;
 
-    return ret;
+    if (ret[0] != data[0]) {
+        return -1;
+    }
+
+    return 0;
 }
 
 uint8_t ADS131A04::send_command(Command command, uint16_t *value)
 {
-    static char data[2];
+    static char data[WORD_LENGTH] = { 0 };
     data[0] = (char)static_cast<uint16_t>(Command::wreg) >> 8;
     data[1] = (char)static_cast<uint16_t>(Command::wreg);
 
     *_cs = 0;
 
-    if (_spi->write(data, 2, data, 2) != 0) {
+    if (_spi->write(data, WORD_LENGTH, data, WORD_LENGTH) != 0) {
+        *_cs = 1;
         return -1;
     }
 

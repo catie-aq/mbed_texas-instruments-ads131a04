@@ -10,6 +10,7 @@
 namespace sixtron {
 
 #define CHIP_ID 0x04
+#define WORD_LENGTH 4
 
 class ADS131A04 {
 public:

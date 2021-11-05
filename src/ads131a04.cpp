@@ -60,16 +60,16 @@ int8_t ADS131A04::start()
 {
     uint16_t status = 0;
 
-    status = send_command(Command::unlock);
+    send_command(Command::unlock, &status);
 
     if (status == 0x0655) {
         // Enable All ADC channel
         spi_write_register(RegisterAddress::adc_ena, 0x0F);
 
         // Wake-up from standby mode
-        send_command(Command::wakeup);
+        send_command(Command::wakeup, &status);
 
-        send_command(Command::lock);
+        send_command(Command::lock, &status);
 
         return 0;
     }
@@ -81,17 +81,16 @@ int8_t ADS131A04::stop()
 {
     uint16_t status = 0;
 
-    status = send_command(Command::unlock);
+    send_command(Command::unlock, &status);
 
     if (status == 0x0655) {
         // Disable All ADC channel
         spi_write_register(RegisterAddress::adc_ena, 0x00);
 
         // Wake-up from standby mode
-        send_command(Command::wakeup);
+        send_command(Command::wakeup, &status);
 
-        send_command(Command::lock);
-
+        send_command(Command::lock, &status);
         return 0;
     }
 

@@ -26,15 +26,17 @@ public:
 
     ADS131A04(SPI *spi, PinName cs, PinName reset, PinName drdy);
 
-    uint8_t init();
+    int8_t init();
 
-    uint8_t set_gain(ADC adc, uint8_t gain);
+    int8_t set_gain(ADC adc, uint8_t gain);
 
-    uint8_t start();
+    int8_t start();
 
-    uint8_t stop();
+    int8_t stop();
 
-    uint8_t read_adc_data(adc_data_struct *dataStruct);
+    int8_t read_adc_data(adc_data_struct *dataStruct);
+
+    void set_adc_data_callback(Callback<void()> func);
 
 private:
     enum class Command : uint16_t {
@@ -80,17 +82,15 @@ private:
 
     void reset();
 
-    uint8_t unlock();
+    int8_t unlock();
 
-    uint8_t lock();
+    int8_t lock();
 
-    uint8_t spi_read_register(RegisterAddress registerAddress, uint8_t *value);
+    int8_t spi_read_register(RegisterAddress registerAddress, uint8_t *value);
 
-    uint8_t spi_write_register(RegisterAddress registerAddress, uint8_t value);
+    int8_t spi_write_register(RegisterAddress registerAddress, uint8_t value);
 
-    uint8_t send_command(Command command, uint16_t *value = nullptr);
-
-    void set_adc_data_callback(Callback<void()> func);
+    int8_t send_command(Command command, uint16_t *value = nullptr);
 
     SPI *_spi;
 

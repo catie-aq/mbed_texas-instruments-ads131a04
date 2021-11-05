@@ -17,7 +17,7 @@ void ADS131A04::reset()
     // TODO : Implement
 }
 
-uint8_t ADS131A04::init()
+int8_t ADS131A04::init()
 {
     uint16_t status = 0;
 
@@ -41,7 +41,7 @@ uint8_t ADS131A04::init()
     return 0;
 }
 
-uint8_t ADS131A04::start()
+int8_t ADS131A04::start()
 {
     uint16_t status = 0;
 
@@ -62,7 +62,7 @@ uint8_t ADS131A04::start()
     return -1;
 }
 
-uint8_t ADS131A04::stop()
+int8_t ADS131A04::stop()
 {
     uint16_t status = 0;
 
@@ -83,7 +83,7 @@ uint8_t ADS131A04::stop()
     return -1;
 }
 
-uint8_t ADS131A04::set_gain(ADC adc, uint8_t gain)
+int8_t ADS131A04::set_gain(ADC adc, uint8_t gain)
 {
     switch (adc) {
         case ADC::adc1:
@@ -122,7 +122,7 @@ void ADS131A04::set_adc_data_callback(Callback<void()> func)
     }
 }
 
-uint8_t ADS131A04::read_adc_data(adc_data_struct *adc_data)
+int8_t ADS131A04::read_adc_data(adc_data_struct *adc_data)
 {
     static char data[5 * WORD_LENGTH] = { 0 };
     data[0] = 0x00;
@@ -154,7 +154,7 @@ uint8_t ADS131A04::read_adc_data(adc_data_struct *adc_data)
     return 0;
 }
 
-uint8_t ADS131A04::spi_read_register(RegisterAddress registerAddress, uint8_t *value)
+int8_t ADS131A04::spi_read_register(RegisterAddress registerAddress, uint8_t *value)
 {
     static char data[WORD_LENGTH] = { 0 };
     data[0] = static_cast<char>(Command::rreg) | static_cast<char>(registerAddress);
@@ -180,7 +180,7 @@ uint8_t ADS131A04::spi_read_register(RegisterAddress registerAddress, uint8_t *v
     return 0;
 }
 
-uint8_t ADS131A04::spi_write_register(RegisterAddress registerAddress, uint8_t value)
+int8_t ADS131A04::spi_write_register(RegisterAddress registerAddress, uint8_t value)
 {
     static char data[WORD_LENGTH] = { 0 };
     data[0] = static_cast<char>(Command::wreg) | static_cast<char>(registerAddress);
@@ -209,7 +209,7 @@ uint8_t ADS131A04::spi_write_register(RegisterAddress registerAddress, uint8_t v
     return 0;
 }
 
-uint8_t ADS131A04::send_command(Command command, uint16_t *value)
+int8_t ADS131A04::send_command(Command command, uint16_t *value)
 {
     static char data[WORD_LENGTH] = { 0 };
     data[0] = (char)static_cast<uint16_t>(Command::wreg) >> 8;

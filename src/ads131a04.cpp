@@ -36,21 +36,24 @@ int8_t ADS131A04::init()
     send_command(Command::null, &status);
 
     if (status == 0xff04) {
-        status = send_command(Command::unlock);
+        send_command(Command::unlock, &status);
 
         if (status == 0x0655) {
-            spi_write_register(RegisterAddress::clk1, 0x02); // CLKIN/2
+            spi_write_register(RegisterAddress::a_sys_cfg, 0x60);
+
+            spi_write_register(RegisterAddress::clk1, 0x0E); // CLKIN/2
 
             spi_write_register(RegisterAddress::clk2, 0x25); // FMOD/512 | ICLK/2
 
-            // Enable All ADC channel
-            spi_write_register(RegisterAddress::adc_ena, 0x0F);
+            send_command(Command::wakeup, &status);
 
-            send_command(Command::lock);
+            send_command(Command::lock, &status);
+
+            return 0;
         }
     }
 
-    return 0;
+    return -1;
 }
 
 int8_t ADS131A04::start()

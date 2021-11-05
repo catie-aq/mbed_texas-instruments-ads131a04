@@ -204,12 +204,12 @@ int8_t ADS131A04::spi_write_register(RegisterAddress registerAddress, uint8_t va
 
     _cs = 0;
 
-    if (_spi->write(data, WORD_LENGTH, nullptr, 0) != 0) {
+    if (_spi->write(data, WORD_LENGTH, nullptr, 0) < 0) {
         _cs = 1;
         return -1;
     }
 
-    if (_spi->write(ret, WORD_LENGTH, ret, WORD_LENGTH) != 0) {
+    if (_spi->write(ret, WORD_LENGTH, ret, WORD_LENGTH) < 0) {
         _cs = 1;
         return -1;
     }
@@ -225,20 +225,30 @@ int8_t ADS131A04::spi_write_register(RegisterAddress registerAddress, uint8_t va
 
 int8_t ADS131A04::send_command(Command command, uint16_t *value)
 {
-    static char data[WORD_LENGTH] = { 0 };
-    data[0] = (char)static_cast<uint16_t>(Command::wreg) >> 8;
-    data[1] = (char)static_cast<uint16_t>(Command::wreg);
+    char receiv[WORD_LENGTH] = { 0 };
+    char data[WORD_LENGTH] = { 0 };
+    data[0] = (static_cast<uint16_t>(command) >> 8) & 0xff;
+    data[1] = static_cast<uint16_t>(command) & 0xff;
 
     _cs = 0;
 
-    if (_spi->write(data, WORD_LENGTH, data, WORD_LENGTH) != 0) {
+    if (_spi->write(data, WORD_LENGTH, data, WORD_LENGTH) < 0) {
         _cs = 1;
         return -1;
     }
 
     _cs = 1;
 
-    *value = ((uint16_t)data[0] << 8) | ((uint16_t)data[1] & 0x00FF);
+    _cs = 0;
+
+    if (_spi->write(receiv, WORD_LENGTH, receiv, WORD_LENGTH) < 0) {
+        _cs = 1;
+        return -1;
+    }
+
+    _cs = 1;
+
+    *value = ((uint16_t)receiv[0] << 8) | ((uint16_t)receiv[1] & 0x00FF);
 
     return 0;
 }

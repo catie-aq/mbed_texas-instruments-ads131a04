@@ -14,7 +14,16 @@ ADS131A04::ADS131A04(SPI *spi, PinName cs, PinName reset, PinName drdy):
 
 void ADS131A04::reset()
 {
-    // TODO : Implement
+    _reset = 0;
+    ThisThread::sleep_for(500ms);
+    _reset = 1;
+    ThisThread::sleep_for(5ms);
+
+    while (_drdy == 0);
+
+    while (_drdy == 1);
+
+    ThisThread::sleep_for(500ms);
 }
 
 int8_t ADS131A04::init()

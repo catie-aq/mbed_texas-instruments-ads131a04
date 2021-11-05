@@ -10,6 +10,9 @@ ADS131A04::ADS131A04(SPI *spi, PinName cs, PinName reset, PinName drdy):
         _spi(spi), _cs(cs), _reset(reset), _drdy(drdy)
 {
     _spi->format(8, 1);
+    _spi->frequency(10000000);
+    _reset = 1;
+    _cs = 1;
 }
 
 void ADS131A04::reset()

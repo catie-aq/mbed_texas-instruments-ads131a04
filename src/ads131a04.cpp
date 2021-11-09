@@ -53,6 +53,8 @@ int8_t ADS131A04::start()
 
         send_command(Command::lock, &status);
 
+        _drdy.enable_irq();
+
         return 0;
     }
 
@@ -69,10 +71,13 @@ int8_t ADS131A04::stop()
         // Disable All ADC channel
         spi_write_register(RegisterAddress::adc_ena, 0x00);
 
-        // Wake-up from standby mode
+        // Standby from Wake-up mode
         send_command(Command::standby, &status);
 
         send_command(Command::lock, &status);
+
+        _drdy.disable_irq();
+
         return 0;
     }
 
@@ -152,10 +157,6 @@ void ADS131A04::set_adc_data_callback(Callback<void()> func)
 {
     if (func) {
         _drdy.fall(func);
-        _drdy.enable_irq();
-    } else {
-        _drdy.rise(NULL);
-        _drdy.disable_irq();
     }
 }
 
@@ -220,12 +221,10 @@ int8_t ADS131A04::spi_read_register(RegisterAddress registerAddress, uint8_t *va
 
 int8_t ADS131A04::spi_write_register(RegisterAddress registerAddress, uint8_t value)
 {
-    static char data[WORD_LENGTH] = { 0 };
+    char receiv[WORD_LENGTH] = { 0 };
+    char data[WORD_LENGTH] = { 0 };
     data[0] = static_cast<char>(Command::wreg) | static_cast<char>(registerAddress);
     data[1] = static_cast<char>(value);
-
-    static char ret[WORD_LENGTH] = { 0 };
-    static char ret1[WORD_LENGTH] = { 0 };
 
     _cs = 0;
 
@@ -238,14 +237,14 @@ int8_t ADS131A04::spi_write_register(RegisterAddress registerAddress, uint8_t va
 
     _cs = 0;
 
-    if (_spi->write(ret, WORD_LENGTH, ret1, WORD_LENGTH) < 0) {
+    if (_spi->write(receiv, WORD_LENGTH, receiv, WORD_LENGTH) < 0) {
         _cs = 1;
         return -1;
     }
 
     _cs = 1;
 
-    if (ret[1] != data[1]) {
+    if (receiv[1] != data[1]) {
         return -1;
     }
 
@@ -261,7 +260,7 @@ int8_t ADS131A04::send_command(Command command, uint16_t *value)
 
     _cs = 0;
 
-    if (_spi->write(data, WORD_LENGTH, data, WORD_LENGTH) < 0) {
+    if (_spi->write(data, WORD_LENGTH, nullptr, 0) < 0) {
         _cs = 1;
         return -1;
     }

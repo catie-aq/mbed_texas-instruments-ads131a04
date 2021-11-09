@@ -153,7 +153,7 @@ int8_t ADS131A04::set_frequency(Frequency freq)
     return 0;
 }
 
-void ADS131A04::set_adc_data_callback(Callback<void()> func)
+void ADS131A04::attach_callback(Callback<void()> func)
 {
     if (func) {
         _drdy.fall(func);

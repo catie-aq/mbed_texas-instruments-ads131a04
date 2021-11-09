@@ -45,7 +45,7 @@ public:
 
     int8_t read_adc_data(adc_data_struct *dataStruct);
 
-    void set_adc_data_callback(Callback<void()> func);
+    void attach_callback(Callback<void()> func);
 
 private:
     enum class Command : uint16_t {

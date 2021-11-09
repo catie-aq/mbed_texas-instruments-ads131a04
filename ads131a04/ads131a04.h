@@ -24,11 +24,20 @@ class ADS131A04 {
 public:
     enum class ADC : uint8_t { all = 0x00, adc1 = 0x01, adc2 = 0x02, adc3 = 0x03, adc4 = 0x04 };
 
+    enum class Frequency : uint8_t {
+        _500Hz = 0x00,
+        _1000Hz = 0x01,
+        _2000Hz = 0x02,
+        _2560Hz = 0x03
+    };
+
     ADS131A04(SPI *spi, PinName cs, PinName reset, PinName drdy);
 
     int8_t init();
 
     int8_t set_gain(ADC adc, uint8_t gain);
+
+    int8_t set_frequency(Frequency freq);
 
     int8_t start();
 
@@ -49,10 +58,10 @@ private:
         unlock = 0x655,
 
         // register write ans read commands
-        rreg = 0x2000,
-        rregs = 0x2000,
-        wreg = 0x4000,
-        wregs = 0x6000
+        rreg = 0x20,
+        rregs = 0x20,
+        wreg = 0x40,
+        wregs = 0x60
     };
 
     enum class RegisterAddress : uint8_t {

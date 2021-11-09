@@ -21,36 +21,18 @@ void ADS131A04::reset()
     ThisThread::sleep_for(500ms);
     _reset = 1;
     ThisThread::sleep_for(5ms);
-
-    while (_drdy == 0);
-
-    while (_drdy == 1);
-
-    ThisThread::sleep_for(500ms);
 }
 
 int8_t ADS131A04::init()
 {
+    reset();
+
     uint16_t status = 0;
 
     send_command(Command::null, &status);
 
     if (status == 0xff04) {
-        send_command(Command::unlock, &status);
-
-        if (status == 0x0655) {
-            spi_write_register(RegisterAddress::a_sys_cfg, 0x60);
-
-            spi_write_register(RegisterAddress::clk1, 0x0E); // CLKIN/2
-
-            spi_write_register(RegisterAddress::clk2, 0x25); // FMOD/512 | ICLK/2
-
-            send_command(Command::wakeup, &status);
-
-            send_command(Command::lock, &status);
-
-            return 0;
-        }
+        return 0;
     }
 
     return -1;
@@ -88,7 +70,7 @@ int8_t ADS131A04::stop()
         spi_write_register(RegisterAddress::adc_ena, 0x00);
 
         // Wake-up from standby mode
-        send_command(Command::wakeup, &status);
+        send_command(Command::standby, &status);
 
         send_command(Command::lock, &status);
         return 0;
@@ -99,27 +81,68 @@ int8_t ADS131A04::stop()
 
 int8_t ADS131A04::set_gain(ADC adc, uint8_t gain)
 {
-    switch (adc) {
-        case ADC::adc1:
-            spi_write_register(RegisterAddress::adc1, gain);
-            break;
-        case ADC::adc2:
-            spi_write_register(RegisterAddress::adc2, gain);
-            break;
-        case ADC::adc3:
-            spi_write_register(RegisterAddress::adc3, gain);
-            break;
-        case ADC::adc4:
-            spi_write_register(RegisterAddress::adc4, gain);
-            break;
-        case ADC::all:
-            spi_write_register(RegisterAddress::adc1, gain);
-            spi_write_register(RegisterAddress::adc2, gain);
-            spi_write_register(RegisterAddress::adc3, gain);
-            spi_write_register(RegisterAddress::adc4, gain);
-            break;
-        default:
-            return -1;
+    uint16_t status = 0;
+
+    send_command(Command::unlock, &status);
+
+    if (status == 0x0655) {
+        switch (adc) {
+            case ADC::adc1:
+                spi_write_register(RegisterAddress::adc1, gain);
+                break;
+            case ADC::adc2:
+                spi_write_register(RegisterAddress::adc2, gain);
+                break;
+            case ADC::adc3:
+                spi_write_register(RegisterAddress::adc3, gain);
+                break;
+            case ADC::adc4:
+                spi_write_register(RegisterAddress::adc4, gain);
+                break;
+            case ADC::all:
+                spi_write_register(RegisterAddress::adc1, gain);
+                spi_write_register(RegisterAddress::adc2, gain);
+                spi_write_register(RegisterAddress::adc3, gain);
+                spi_write_register(RegisterAddress::adc4, gain);
+                break;
+            default:
+                return -1;
+        }
+        send_command(Command::lock, &status);
+    }
+
+    return 0;
+}
+
+int8_t ADS131A04::set_frequency(Frequency freq)
+{
+    uint16_t status = 0;
+
+    send_command(Command::unlock, &status);
+
+    if (status == 0x0655) {
+        // Ref CLK: 16.3840 MHz
+        switch (freq) {
+            case Frequency::_500Hz:
+                spi_write_register(RegisterAddress::clk1, 0x08); // CLKIN/8
+                spi_write_register(RegisterAddress::clk2, 0x85); // FICLK/8 FMOD/512
+                break;
+            case Frequency::_1000Hz:
+                spi_write_register(RegisterAddress::clk1, 0x08); // CLKIN/8
+                spi_write_register(RegisterAddress::clk2, 0x88); // FICLK/8 FMOD/256
+                break;
+            case Frequency::_2000Hz:
+                spi_write_register(RegisterAddress::clk1, 0x08); // CLKIN/8
+                spi_write_register(RegisterAddress::clk2, 0x8B); // FICLK/8 FMOD/128
+                break;
+            case Frequency::_2560Hz:
+                spi_write_register(RegisterAddress::clk1, 0x08); // CLKIN/8
+                spi_write_register(RegisterAddress::clk2, 0x49); // FICLK/8 FMOD/512
+                break;
+            default:
+                return -1;
+        }
+        send_command(Command::lock, &status);
     }
 
     return 0;
@@ -144,7 +167,7 @@ int8_t ADS131A04::read_adc_data(adc_data_struct *adc_data)
 
     _cs = 0;
 
-    if (_spi->write((char *)data, 2, (char *)data, 5 * WORD_LENGTH) != 0) {
+    if (_spi->write((char *)data, 5 * WORD_LENGTH, (char *)data, 5 * WORD_LENGTH) < 0) {
         _cs = 1;
         return -1;
     }
@@ -152,6 +175,7 @@ int8_t ADS131A04::read_adc_data(adc_data_struct *adc_data)
     _cs = 1;
 
     adc_data->response = ((uint16_t)data[0] << 8) | ((uint16_t)data[1] & 0x00FF);
+
     adc_data->channel1 = (((int32_t)(((int32_t)data[4] << 24) | ((int32_t)data[5] << 16)
                                   | ((int32_t)data[6] << 8)))
             >> 8);
@@ -201,6 +225,7 @@ int8_t ADS131A04::spi_write_register(RegisterAddress registerAddress, uint8_t va
     data[1] = static_cast<char>(value);
 
     static char ret[WORD_LENGTH] = { 0 };
+    static char ret1[WORD_LENGTH] = { 0 };
 
     _cs = 0;
 
@@ -209,14 +234,18 @@ int8_t ADS131A04::spi_write_register(RegisterAddress registerAddress, uint8_t va
         return -1;
     }
 
-    if (_spi->write(ret, WORD_LENGTH, ret, WORD_LENGTH) < 0) {
+    _cs = 1;
+
+    _cs = 0;
+
+    if (_spi->write(ret, WORD_LENGTH, ret1, WORD_LENGTH) < 0) {
         _cs = 1;
         return -1;
     }
 
     _cs = 1;
 
-    if (ret[0] != data[0]) {
+    if (ret[1] != data[1]) {
         return -1;
     }
 

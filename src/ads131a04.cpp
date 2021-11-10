@@ -195,34 +195,37 @@ int8_t ADS131A04::read_adc_data(adc_data_struct *adc_data)
 
 int8_t ADS131A04::spi_read_register(RegisterAddress registerAddress, uint8_t *value)
 {
-    static char data[WORD_LENGTH] = { 0 };
+    char data[WORD_LENGTH] = { 0 };
+    char receiv[WORD_LENGTH] = { 0 };
     data[0] = static_cast<char>(Command::rreg) | static_cast<char>(registerAddress);
-
-    static char ret[WORD_LENGTH] = { 0 };
 
     _cs = 0;
 
-    if (_spi->write(data, WORD_LENGTH, nullptr, 0) != 0) {
-        _cs = 1;
-        return -1;
-    }
-
-    if (_spi->write(ret, WORD_LENGTH, ret, WORD_LENGTH) != 0) {
+    if (_spi->write(data, WORD_LENGTH, nullptr, 0) < 0) {
         _cs = 1;
         return -1;
     }
 
     _cs = 1;
 
-    *value = ret[1];
+    _cs = 0;
+
+    if (_spi->write(receiv, WORD_LENGTH, receiv, WORD_LENGTH) < 0) {
+        _cs = 1;
+        return -1;
+    }
+
+    _cs = 1;
+
+    *value = receiv[1];
 
     return 0;
 }
 
 int8_t ADS131A04::spi_write_register(RegisterAddress registerAddress, uint8_t value)
 {
-    char receiv[WORD_LENGTH] = { 0 };
     char data[WORD_LENGTH] = { 0 };
+    char receiv[WORD_LENGTH] = { 0 };
     data[0] = static_cast<char>(Command::wreg) | static_cast<char>(registerAddress);
     data[1] = static_cast<char>(value);
 

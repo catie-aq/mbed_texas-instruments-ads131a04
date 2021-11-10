@@ -49,9 +49,9 @@ int8_t ADS131A04::start()
         spi_write_register(RegisterAddress::adc_ena, 0x0F);
 
         // Wake-up from standby mode
-        send_command(Command::wakeup, &status);
+        send_command(Command::wakeup);
 
-        send_command(Command::lock, &status);
+        send_command(Command::lock);
 
         _drdy.enable_irq();
 
@@ -72,9 +72,9 @@ int8_t ADS131A04::stop()
         spi_write_register(RegisterAddress::adc_ena, 0x00);
 
         // Standby from Wake-up mode
-        send_command(Command::standby, &status);
+        send_command(Command::standby);
 
-        send_command(Command::lock, &status);
+        send_command(Command::lock);
 
         _drdy.disable_irq();
 
@@ -113,7 +113,7 @@ int8_t ADS131A04::set_gain(ADC adc, uint8_t gain)
             default:
                 return -1;
         }
-        send_command(Command::lock, &status);
+        send_command(Command::lock);
     }
 
     return 0;
@@ -147,7 +147,7 @@ int8_t ADS131A04::set_frequency(Frequency freq)
             default:
                 return -1;
         }
-        send_command(Command::lock, &status);
+        send_command(Command::lock);
     }
 
     return 0;
@@ -267,16 +267,18 @@ int8_t ADS131A04::send_command(Command command, uint16_t *value)
 
     _cs = 1;
 
-    _cs = 0;
+    if (value) {
+        _cs = 0;
 
-    if (_spi->write(receiv, WORD_LENGTH, receiv, WORD_LENGTH) < 0) {
+        if (_spi->write(receiv, WORD_LENGTH, receiv, WORD_LENGTH) < 0) {
+            _cs = 1;
+            return -1;
+        }
+
         _cs = 1;
-        return -1;
+
+        *value = ((uint16_t)receiv[0] << 8) | ((uint16_t)receiv[1] & 0x00FF);
     }
-
-    _cs = 1;
-
-    *value = ((uint16_t)receiv[0] << 8) | ((uint16_t)receiv[1] & 0x00FF);
 
     return 0;
 }

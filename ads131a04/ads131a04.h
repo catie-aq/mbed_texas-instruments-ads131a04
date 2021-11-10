@@ -22,13 +22,19 @@ typedef struct adc_data_struct {
 
 class ADS131A04 {
 public:
-    enum class ADC : uint8_t { all = 0x00, adc1 = 0x01, adc2 = 0x02, adc3 = 0x03, adc4 = 0x04 };
+    enum class ADC : uint8_t {
+        all = 0x00,
+        adc1 = 0x01,
+        adc2 = 0x02,
+        adc3 = 0x03,
+        adc4 = 0x04,
+    };
 
     enum class Frequency : uint8_t {
         _500Hz = 0x00,
         _1000Hz = 0x01,
         _2000Hz = 0x02,
-        _2560Hz = 0x03
+        _2560Hz = 0x03,
     };
 
     ADS131A04(SPI *spi, PinName cs, PinName reset, PinName drdy);
@@ -90,10 +96,6 @@ private:
     };
 
     void reset();
-
-    int8_t unlock();
-
-    int8_t lock();
 
     int8_t spi_read_register(RegisterAddress registerAddress, uint8_t *value);
 

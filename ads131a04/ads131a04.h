@@ -10,7 +10,7 @@
 namespace sixtron {
 
 #define CHIP_ID 0x04
-#define WORD_LENGTH 4
+#define WORD_LENGTH (MBED_CONF_ADS131A04_WORD_LENGTH >> 3)
 
 typedef struct adc_data_struct {
     uint16_t response;

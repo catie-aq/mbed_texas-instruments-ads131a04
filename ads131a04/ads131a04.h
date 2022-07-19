@@ -35,6 +35,7 @@ public:
         _1000Hz = 0x01,
         _2000Hz = 0x02,
         _2560Hz = 0x03,
+        _2666Hz = 0x04,
     };
 
     ADS131A04(SPI *spi, PinName cs, PinName reset, PinName drdy);

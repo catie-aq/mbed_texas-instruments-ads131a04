@@ -142,7 +142,11 @@ int8_t ADS131A04::set_frequency(Frequency freq)
                 break;
             case Frequency::_2560Hz:
                 spi_write_register(RegisterAddress::clk1, 0x08); // CLKIN/8
-                spi_write_register(RegisterAddress::clk2, 0x49); // FICLK/8 FMOD/512
+                spi_write_register(RegisterAddress::clk2, 0x49); // FICLK/4 FMOD/512
+                break;
+            case Frequency::_2666Hz:
+                spi_write_register(RegisterAddress::clk1, 0x08); // CLKIN/8
+                spi_write_register(RegisterAddress::clk2, 0xAD); // FICLK/12 FMOD/64
                 break;
             default:
                 return -1;

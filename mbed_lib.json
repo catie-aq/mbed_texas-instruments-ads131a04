@@ -2,8 +2,8 @@
     "name": "ads131a04",
     "config": {
         "word-length": {
-            "help": "Length of the device word (16, 24, 32 bits), this value depends on the state of the M1 pin. Warning: Only 32 bits is supported",
-            "value": 32
+            "help": "Length of the device word (16, 24, 32 bits), this value depends on the state of the M1 pin.",
+            "value": 24
         }
     }
 }

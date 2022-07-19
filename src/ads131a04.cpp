@@ -142,7 +142,11 @@ int8_t ADS131A04::set_frequency(Frequency freq)
                 break;
             case Frequency::_2560Hz:
                 spi_write_register(RegisterAddress::clk1, 0x08); // CLKIN/8
-                spi_write_register(RegisterAddress::clk2, 0x49); // FICLK/8 FMOD/512
+                spi_write_register(RegisterAddress::clk2, 0x49); // FICLK/4 FMOD/512
+                break;
+            case Frequency::_2666Hz:
+                spi_write_register(RegisterAddress::clk1, 0x08); // CLKIN/8
+                spi_write_register(RegisterAddress::clk2, 0xAD); // FICLK/12 FMOD/64
                 break;
             default:
                 return -1;
@@ -177,11 +181,14 @@ int8_t ADS131A04::read_adc_data(adc_data_struct *adc_data)
 
     adc_data->response = ((uint16_t)data[0] << 8) | ((uint16_t)data[1] & 0x00FF);
 
+#if MBED_CONF_ADS131A04_WORD_LENGTH == 32
+
     adc_data->channel1 = (((int32_t)(((int32_t)data[4] << 24) | ((int32_t)data[5] << 16)
                                   | ((int32_t)data[6] << 8)))
             >> 8);
     adc_data->channel2 = (((int32_t)(((int32_t)data[8] << 24) | ((int32_t)data[9] << 16)
                                   | ((int32_t)data[10] << 8)))
+
             >> 8);
     adc_data->channel3 = (((int32_t)(((int32_t)data[12] << 24) | ((int32_t)data[13] << 16)
                                   | ((int32_t)data[14] << 8)))
@@ -189,7 +196,22 @@ int8_t ADS131A04::read_adc_data(adc_data_struct *adc_data)
     adc_data->channel4 = (((int32_t)(((int32_t)data[16] << 24) | ((int32_t)data[17] << 16)
                                   | ((int32_t)data[18] << 8)))
             >> 8);
-
+#elif MBED_CONF_ADS131A04_WORD_LENGTH == 24
+    adc_data->channel1 = (((int32_t)(((int32_t)data[3] << 24) | ((int32_t)data[4] << 16)
+                                  | ((int32_t)data[5] << 8)))
+            >> 8);
+    adc_data->channel2 = (((int32_t)(((int32_t)data[6] << 24) | ((int32_t)data[7] << 16)
+                                  | ((int32_t)data[8] << 8)))
+            >> 8);
+    adc_data->channel3 = (((int32_t)(((int32_t)data[9] << 24) | ((int32_t)data[10] << 16)
+                                  | ((int32_t)data[11] << 8)))
+            >> 8);
+    adc_data->channel4 = (((int32_t)(((int32_t)data[12] << 24) | ((int32_t)data[13] << 16)
+                                  | ((int32_t)data[14] << 8)))
+            >> 8);
+#else
+#error "Word length not supported"
+#endif
     return 0;
 }
 

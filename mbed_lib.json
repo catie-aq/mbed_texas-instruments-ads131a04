@@ -4,6 +4,10 @@
         "word-length": {
             "help": "Length of the device word (16, 24, 32 bits), this value depends on the state of the M1 pin.",
             "value": 24
+        },
+        "quartz-frequency": {
+            "help": "Frequency in [KHz] of the quartz used by ADS131A04. Depending on this frequency, certain delta-sigma frequencies will be allowed or not.",
+            "value": 16384
         }
     }
 }

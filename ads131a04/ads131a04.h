@@ -12,6 +12,42 @@ namespace sixtron {
 #define CHIP_ID 0x04
 #define WORD_LENGTH (MBED_CONF_ADS131A04_WORD_LENGTH >> 3)
 
+#define STATUS_INIT 0xFF04
+#define STATUS_OK 0x0655
+
+#define CLKIN_DIV_2 1
+#define CLKIN_DIV_4 2
+#define CLKIN_DIV_6 3
+#define CLKIN_DIV_8 4
+#define CLKIN_DIV_10 5
+#define CLKIN_DIV_12 6
+#define CLKIN_DIV_14 7
+
+#define FICLK_DIV_2 1
+#define FICLK_DIV_4 2
+#define FICLK_DIV_6 3
+#define FICLK_DIV_8 4
+#define FICLK_DIV_10 5
+#define FICLK_DIV_12 6
+#define FICLK_DIV_14 7
+
+#define OSR_4096 0x00
+#define OSR_2048 0x01
+#define OSR_1024 0x02
+#define OSR_800 0x03
+#define OSR_768 0x04
+#define OSR_512 0x05
+#define OSR_400 0x06
+#define OSR_384 0x07
+#define OSR_256 0x08
+#define OSR_200 0x09
+#define OSR_192 0x0A
+#define OSR_128 0x0B
+#define OSR_96 0x0C
+#define OSR_64 0x0D
+#define OSR_48 0x0E
+#define OSR_32 0x0F
+
 typedef struct adc_data_struct {
     uint16_t response;
     int32_t channel1;
@@ -30,13 +66,7 @@ public:
         adc4 = 0x04,
     };
 
-    enum class Frequency : uint8_t {
-        _500Hz = 0x00,
-        _1000Hz = 0x01,
-        _2000Hz = 0x02,
-        _2560Hz = 0x03,
-        _2666Hz = 0x04,
-    };
+    enum class Frequency : uint8_t { _2500Hz, _2000Hz, _1000Hz, _500Hz, _250Hz };
 
     ADS131A04(SPI *spi, PinName cs, PinName reset, PinName drdy);
 
@@ -44,6 +74,7 @@ public:
 
     int8_t set_gain(ADC adc, uint8_t gain);
 
+    int8_t set_frequency(uint8_t clkin_div, uint8_t ficlk_div, uint8_t fmod_div);
     int8_t set_frequency(Frequency freq);
 
     int8_t start();

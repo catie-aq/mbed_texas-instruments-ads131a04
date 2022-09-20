@@ -160,7 +160,7 @@ int8_t ADS131A04::set_frequency(Frequency freq)
             return set_frequency(CLKIN_DIV_8, FICLK_DIV_8, OSR_512);
         case Frequency::_250Hz: // 250Hz
             return set_frequency(CLKIN_DIV_8, FICLK_DIV_2, OSR_4096);
-#elif MBED_CONF_ADS131A04_QUARTZ_FREQUENCY == 20500 // 20500
+#elif MBED_CONF_ADS131A04_QUARTZ_FREQUENCY == 20500
             // Ref CLK =        20.500MHz
         case Frequency::_2500Hz: // 2502.4Hz // Best results, High OSR
             return set_frequency(CLKIN_DIV_2, FICLK_DIV_2, OSR_2048);

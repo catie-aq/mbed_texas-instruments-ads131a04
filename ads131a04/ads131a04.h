@@ -66,7 +66,13 @@ public:
         adc4 = 0x04,
     };
 
-    enum class Frequency : uint8_t { _2500Hz, _2000Hz, _1000Hz, _500Hz, _250Hz };
+    enum class Frequency : uint8_t {
+        _2500Hz,
+        _2000Hz,
+        _1000Hz,
+        _500Hz,
+        _250Hz,
+    };
 
     ADS131A04(SPI *spi, PinName cs, PinName reset, PinName drdy);
 
@@ -95,7 +101,7 @@ private:
         lock = 0x555,
         unlock = 0x655,
 
-        // register write ans read commands
+        // register write and read commands
         rreg = 0x20,
         rregs = 0x20,
         wreg = 0x40,

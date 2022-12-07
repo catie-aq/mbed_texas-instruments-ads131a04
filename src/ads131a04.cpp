@@ -131,7 +131,6 @@ int8_t ADS131A04::set_frequency(uint8_t clkin_div, uint8_t ficlk_div, uint8_t fm
     uint16_t status = 0;
     uint8_t clk1_reg = 0x00 + (clkin_div << 1); // see datasheet 9.6.1.12
     uint8_t clk2_reg = 0x00 + ((ficlk_div << 5) + fmod_div); // see datasheet 9.6.1.1
-    printf("clk1_reg= 0x%02X, clk2_reg= 0x%02X\n", clk1_reg, clk2_reg);
 
     send_command(Command::unlock, &status);
     if (status == STATUS_OK) {

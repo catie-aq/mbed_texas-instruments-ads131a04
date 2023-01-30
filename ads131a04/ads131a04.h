@@ -31,22 +31,22 @@ namespace sixtron {
 #define FICLK_DIV_12 6
 #define FICLK_DIV_14 7
 
-#define OSR_4096 0x00
-#define OSR_2048 0x01
-#define OSR_1024 0x02
-#define OSR_800 0x03
-#define OSR_768 0x04
-#define OSR_512 0x05
-#define OSR_400 0x06
-#define OSR_384 0x07
-#define OSR_256 0x08
-#define OSR_200 0x09
-#define OSR_192 0x0A
-#define OSR_128 0x0B
-#define OSR_96 0x0C
-#define OSR_64 0x0D
-#define OSR_48 0x0E
-#define OSR_32 0x0F
+#define OSR_4096 0x00 // K Scaling = 1.000
+#define OSR_2048 0x01 // K Scaling = 1.000
+#define OSR_1024 0x02 // K Scaling = 1.000
+#define OSR_800 0x03 // K Scaling = 0.998
+#define OSR_768 0x04 // K Scaling = 1.002
+#define OSR_512 0x05 // K Scaling = 1.000
+#define OSR_400 0x06 // K Scaling = 0.998
+#define OSR_384 0x07 // K Scaling = 1.002
+#define OSR_256 0x08 // K Scaling = 1.000
+#define OSR_200 0x09 // K Scaling = 0.998
+#define OSR_192 0x0A // K Scaling = 1.002
+#define OSR_128 0x0B // K Scaling = 1.000
+#define OSR_96 0x0C // K Scaling = 1.002
+#define OSR_64 0x0D // K Scaling = 1.000
+#define OSR_48 0x0E // K Scaling = 1.002
+#define OSR_32 0x0F // K Scaling = 1.000
 
 typedef struct adc_data_struct {
     uint16_t response;

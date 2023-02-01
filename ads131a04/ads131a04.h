@@ -67,6 +67,8 @@ public:
     };
 
     enum class Frequency : uint8_t {
+        _4000Hz,
+        _3000Hz,
         _2500Hz,
         _2000Hz,
         _1000Hz,

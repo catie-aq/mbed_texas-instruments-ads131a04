@@ -148,31 +148,43 @@ int8_t ADS131A04::set_frequency(Frequency freq)
 {
     switch (freq) {
 #if MBED_CONF_ADS131A04_QUARTZ_FREQUENCY == 16384
-            // Ref CLK =        16.384MHz (QUARTZ)
-        case Frequency::_2500Hz: // 2560Hz // Noise on other channels + offset on gain
-            return set_frequency(CLKIN_DIV_4, FICLK_DIV_2, OSR_800);
+            // Input CLK =        16.384MHz (XTAL or TCXO)
+        case Frequency::_4000Hz: // 4000Hz
+            return set_frequency(CLKIN_DIV_2, FICLK_DIV_2, OSR_1024);
+        case Frequency::_3000Hz: // 3048Hz // warning: low OSR
+            return set_frequency(CLKIN_DIV_6, FICLK_DIV_14, OSR_64);
+        case Frequency::_2500Hz: // 2560Hz // warning: low OSR
+            return set_frequency(CLKIN_DIV_10, FICLK_DIV_10, OSR_64);
         case Frequency::_2000Hz: // 2000Hz
-            return set_frequency(CLKIN_DIV_8, FICLK_DIV_8, OSR_128);
+            return set_frequency(CLKIN_DIV_2, FICLK_DIV_2, OSR_2048);
         case Frequency::_1000Hz: // 1000Hz
-            return set_frequency(CLKIN_DIV_8, FICLK_DIV_8, OSR_256);
-        case Frequency::_500Hz: // 500Hz
-            return set_frequency(CLKIN_DIV_8, FICLK_DIV_8, OSR_512);
-        case Frequency::_250Hz: // 250Hz
-            return set_frequency(CLKIN_DIV_8, FICLK_DIV_2, OSR_4096);
+            return set_frequency(CLKIN_DIV_2, FICLK_DIV_2, OSR_4096);
+        case Frequency::_500Hz: // 500.0Hz
+            return set_frequency(CLKIN_DIV_2, FICLK_DIV_4, OSR_4096);
+        case Frequency::_250Hz: // 250.0Hz
+            return set_frequency(CLKIN_DIV_2, FICLK_DIV_8, OSR_4096);
 #elif MBED_CONF_ADS131A04_QUARTZ_FREQUENCY == 20500
-            // Ref CLK =        20.500MHz (QUARTZ)
-        case Frequency::_2500Hz: // 2502.4Hz // Best results, High OSR
+            // Input CLK =        20.500MHz (should be TCXO)
+        case Frequency::_4000Hz: // 4004Hz
+            return set_frequency(CLKIN_DIV_2, FICLK_DIV_10, OSR_256);
+        case Frequency::_3000Hz: // 2860Hz
+            return set_frequency(CLKIN_DIV_2, FICLK_DIV_14, OSR_256);
+        case Frequency::_2500Hz: // 2502Hz
             return set_frequency(CLKIN_DIV_2, FICLK_DIV_2, OSR_2048);
         case Frequency::_2000Hz: // 2002Hz
-            return set_frequency(CLKIN_DIV_8, FICLK_DIV_10, OSR_128);
+            return set_frequency(CLKIN_DIV_2, FICLK_DIV_10, OSR_512);
         case Frequency::_1000Hz: // 1001Hz
-            return set_frequency(CLKIN_DIV_8, FICLK_DIV_10, OSR_256);
+            return set_frequency(CLKIN_DIV_2, FICLK_DIV_10, OSR_1024);
         case Frequency::_500Hz: // 500.5Hz
-            return set_frequency(CLKIN_DIV_8, FICLK_DIV_10, OSR_512);
+            return set_frequency(CLKIN_DIV_2, FICLK_DIV_10, OSR_2048);
         case Frequency::_250Hz: // 250.2Hz
-            return set_frequency(CLKIN_DIV_8, FICLK_DIV_10, OSR_1024);
+            return set_frequency(CLKIN_DIV_2, FICLK_DIV_10, OSR_4096);
 #elif MBED_CONF_ADS131A04_QUARTZ_FREQUENCY == 25000
-            // Ref CLK =        25.000MHz (TCXO)
+            // Input CLK =        25.000MHz (TCXO)
+        case Frequency::_4000Hz: // 4069Hz
+            return set_frequency(CLKIN_DIV_2, FICLK_DIV_6, OSR_512);
+        case Frequency::_3000Hz: // 3052Hz
+            return set_frequency(CLKIN_DIV_2, FICLK_DIV_2, OSR_2048);
         case Frequency::_2500Hz: // 2441Hz
             return set_frequency(CLKIN_DIV_2, FICLK_DIV_10, OSR_512);
         case Frequency::_2000Hz: // 2035Hz
@@ -184,7 +196,7 @@ int8_t ADS131A04::set_frequency(Frequency freq)
         case Frequency::_250Hz: // 254.3Hz
             return set_frequency(CLKIN_DIV_2, FICLK_DIV_12, OSR_4096);
 #else
-#error "quartz frequency not supported."
+#error "Input clock frequency not supported or not implemented."
 #endif
         default:
             return -1;
